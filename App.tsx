@@ -10,6 +10,10 @@ import {
 } from '@expo-google-fonts/poppins' /* importa as fontes */
 
 import theme from './src/global/styles/theme';
+
+import { NavigationContainer } from '@react-navigation/native';
+import { AppRoutes } from './src/routes/app.routes';
+
 import { Register } from './src/screens/Register';
 import { Dashboard } from './src/screens/Dashboard';
 
@@ -29,7 +33,9 @@ export default function App() {
   return (
     /*  */
     <ThemeProvider theme={theme}> 
-      <Register />
+      <NavigationContainer>
+        <AppRoutes />
+      </NavigationContainer>
     </ThemeProvider>
   )
 }
