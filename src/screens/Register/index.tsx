@@ -14,6 +14,9 @@ import { useForm } from 'react-hook-form';
 
 import AsyncStorage from '@react-native-async-storage/async-storage' /* para armazenar os dados no dispositivo do usuario */
 
+import uuid from 'react-native-uuid';
+import { useNavigation } from '@react-navigation/native';
+
 import { InputForm } from '../../components/Form/InputForm'; /* Importação do componente Input */
 import { Button } from '../../components/Form/Button'; /* Importação do componente button */
 import { TransactionTypeButton } from '../../components/Form/TransactionTypeButton'; /* Importação do componente de tipo de transação */
@@ -29,6 +32,7 @@ import {
   Fields,
   TransactionsTypes,
 } from './styles'; /* importação do container(View principal do Register) */
+import { NativeScreenNavigationContainer } from 'react-native-screens';
 
 export type FormData = {
   [name: string]: any;
@@ -38,6 +42,10 @@ const schema = Yup.object().shape({
   name: Yup.string().required('Nome é obrigatório'),
   amount: Yup.number().typeError('Informe um valor númerico').positive('O valor não pode ser negativo')
 });
+
+type NavigationProps = {
+  navigate: (screen:string) => void;
+}
 
 
 
@@ -51,9 +59,12 @@ export function Register() {
     name: 'Categoria',
   });
 
+  const navigation = useNavigation<NavigationProps>();
+
   const {
     control,
     handleSubmit,
+    reset,
     formState: { errors }
   } = useForm({
     resolver: yupResolver(schema)
@@ -80,15 +91,34 @@ export function Register() {
       return Alert.alert('Selecione a categoria');
     }
 
-    const dataFormRegister = {
+    const newTransaction = {
+      id: String(uuid.v4()),
       name: form.name,
       amount: form.amount,
       transactionType,
-      category: category.key
+      category: category.key,
+      date: new Date()
     }
     
     try {
-      await AsyncStorage.setItem(dataKey, JSON.stringify(dataFormRegister)); /* passa pro asyncstorage a chave e os dados convertidos em string */
+      const data = await AsyncStorage.getItem(dataKey); /* pega os dados do asyncstorage */
+      const currentData = data ? JSON.parse(data) : []; /* se tiver algo em data ele devolve convertido, se não retorna um vetor vazio */
+
+      const dataFormatted = [
+        ...currentData,
+        newTransaction
+      ]
+
+      await AsyncStorage.setItem(dataKey, JSON.stringify(dataFormatted)); /* passa pro asyncstorage a chave e os dados convertidos em string */
+      
+      reset(); /* reseta o formulario */
+      setTransactionType('');
+      setCategory({
+        key: 'category',
+        name: 'Categoria',
+      })
+
+      navigation.navigate('Listagem') /* redireciona para a pagina de listagem */
 
     } catch(error) {
       console.log(error);
