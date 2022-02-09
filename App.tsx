@@ -16,6 +16,7 @@ import { AppRoutes } from './src/routes/app.routes';
 
 import { Register } from './src/screens/Register';
 import { Dashboard } from './src/screens/Dashboard';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 
 export default function App() {
@@ -34,7 +35,9 @@ export default function App() {
     /*  */
     <ThemeProvider theme={theme}> 
       <NavigationContainer>
-        <AppRoutes />
+        <GestureHandlerRootView style={{ flex: 1}}>
+          <AppRoutes />
+        </GestureHandlerRootView>
       </NavigationContainer>
     </ThemeProvider>
   )
