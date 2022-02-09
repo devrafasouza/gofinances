@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Alert,
   Modal, 
@@ -12,7 +12,8 @@ import { yupResolver } from '@hookform/resolvers/yup'
 
 import { useForm } from 'react-hook-form';
 
-import { Input } from '../../components/Form/Input'; /* Importação do componente Input */
+import AsyncStorage from '@react-native-async-storage/async-storage' /* para armazenar os dados no dispositivo do usuario */
+
 import { InputForm } from '../../components/Form/InputForm'; /* Importação do componente Input */
 import { Button } from '../../components/Form/Button'; /* Importação do componente button */
 import { TransactionTypeButton } from '../../components/Form/TransactionTypeButton'; /* Importação do componente de tipo de transação */
@@ -43,6 +44,7 @@ const schema = Yup.object().shape({
 export function Register() {
   const [transactionType, setTransactionType] = useState('');
   const [categoryModalOpen, setCategoryModalOpen] = useState(false); /* estado que verifica e seta quando o botão de categoria é clickado e abre o modal */
+  const dataKey = '@gofinaces:transactions'; /* chave da coleção */
 
   const [category, setCategory] = useState({
     key: 'category',
@@ -69,7 +71,7 @@ export function Register() {
     setCategoryModalOpen(false);
   }
 
-  function handleSubmitRegister(form: FormData) { 
+  async function handleSubmitRegister(form: FormData) { 
     if(!transactionType) {
       return Alert.alert('Selecione o tipo de transação');
     }
@@ -84,8 +86,25 @@ export function Register() {
       transactionType,
       category: category.key
     }
-    console.log('Log: dataFormRegister', dataFormRegister)
+    
+    try {
+      await AsyncStorage.setItem(dataKey, JSON.stringify(dataFormRegister)); /* passa pro asyncstorage a chave e os dados convertidos em string */
+
+    } catch(error) {
+      console.log(error);
+      Alert.alert("Não foi possível salvar");
+    }
+
   }
+
+  useEffect(() => {
+    async function loadData(){
+      const data = await AsyncStorage.getItem(dataKey);
+      console.log(JSON.parse(data!));
+    }
+
+    loadData();
+  }, []);
   
   return(
     /* View Principal */
