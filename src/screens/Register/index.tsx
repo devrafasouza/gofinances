@@ -52,7 +52,7 @@ type NavigationProps = {
 export function Register() {
   const [transactionType, setTransactionType] = useState('');
   const [categoryModalOpen, setCategoryModalOpen] = useState(false); /* estado que verifica e seta quando o botão de categoria é clickado e abre o modal */
-  const dataKey = '@gofinaces:transactions'; /* chave da coleção */
+  
 
   const [category, setCategory] = useState({
     key: 'category',
@@ -101,6 +101,8 @@ export function Register() {
     }
     
     try {
+      const dataKey = '@gofinaces:transactions'; /* chave da coleção */
+
       const data = await AsyncStorage.getItem(dataKey); /* pega os dados do asyncstorage */
       const currentData = data ? JSON.parse(data) : []; /* se tiver algo em data ele devolve convertido, se não retorna um vetor vazio */
 
@@ -127,14 +129,6 @@ export function Register() {
 
   }
 
-  useEffect(() => {
-    async function loadData(){
-      const data = await AsyncStorage.getItem(dataKey);
-      console.log(JSON.parse(data!));
-    }
-
-    loadData();
-  }, []);
   
   return(
     /* View Principal */

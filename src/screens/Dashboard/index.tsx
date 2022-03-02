@@ -1,7 +1,12 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { getBottomSpace } from 'react-native-iphone-x-helper';
 import { HighlightCard } from '../../components/HighlightCard';
 import { TransactionCard, TransactionCardProps } from '../../components/TransactionCard';
+
+import AsyncStorage from '@react-native-async-storage/async-storage'
+
+import 'intl';
+import 'intl/locale-data/jsonp/pt-BR';
 
 import { 
     Container,
@@ -27,41 +32,43 @@ export interface DataListProps extends TransactionCardProps {
 
 
 export function Dashboard() {
-    const data: DataListProps[]  = [
-        {
-        id: '1',
-        type: 'positive',   
-        title:"Desenvolvimento de site",
-        amount:"R$ 12.000,00",
-        category:{
-            name: 'Vendas',
-            icon: 'dollar-sign'
-        },
-        date:"13/04/2020"
-        },
-        {
-        id: '2',
-        type: 'negative',
-        title:"Hamburgueria Pizzy",
-        amount:"R$ 59,00",
-        category:{
-            name: 'Alimentação',
-            icon: 'coffee'
-        },
-        date:"13/04/2020"
-        },
-        {
-        id: '3',
-        type: 'negative',
-        title:"Aluguel do apartamento",
-        amount:"R$ 1.2000,00",
-        category:{
-            name: 'Casa',
-            icon: 'shopping-bag'
-        },
-        date:"13/04/2020"
-        }
-    ]
+   const [data, setData] = useState<DataListProps[]>([]); /* estado das transações da listagem */
+   
+   async function loadTransactions(){
+       const dataKey = '@gofinaces:transactions'; /* chave da coleção */
+       const response = await AsyncStorage.getItem(dataKey);
+       const transactions = response ? JSON.parse(response) : [];
+
+       const transactionsFormatted: DataListProps[] = transactions
+       .map((item: DataListProps) =>{
+           const amount = Number(item.amount).toLocaleString('pt-BR', {
+               style: 'currency',
+               currency: 'BRL'
+           })
+
+           const date = Intl.DateTimeFormat('pt-BR', {
+               day: '2-digit',
+               month: '2-digit',
+               year: '2-digit',
+           }).format(new Date(item.date));
+
+           return {
+               id: item.id,
+               name: item.name,
+               amount,
+               type: item.type,
+               category: item.category,
+               date
+           }
+
+       });
+
+       setData(transactionsFormatted);
+   }
+
+   useEffect(() => {
+       loadTransactions();
+   }, []);
 
 
     return (
@@ -69,10 +76,10 @@ export function Dashboard() {
             <Header>
                 <UserWrapper>
                     <UserInfo>
-                        <Photo source={{ uri: "https://scontent.fldb12-1.fna.fbcdn.net/v/t1.6435-9/62592170_829307124110177_3271791595149590528_n.jpg?_nc_cat=107&ccb=1-5&_nc_sid=09cbfe&_nc_eui2=AeGIhUBsxfi4P6Rd3pJLSMQRUSZRX9IL3fxRJlFf0gvd_OiQME2polaRQjt2vZ5SJPI9K-CrHPBSUdhEVCzcIOZ6&_nc_ohc=hZD8EzLp9XQAX_X-FFg&_nc_ht=scontent.fldb12-1.fna&oh=00_AT9H7zyf6t84nIzRrDjrdBg_WPg96jJF9otksT8l4m_p5A&oe=621DD652"}}/>
+                        <Photo source={{ uri: "https://scontent.fldb7-1.fna.fbcdn.net/v/t39.30808-6/273683845_3209509192611300_8263049014122811492_n.jpg?_nc_cat=107&ccb=1-5&_nc_sid=09cbfe&_nc_eui2=AeETZZaVxaLZ0-XtxPx9OoKyGvo-uyglGLYa-j67KCUYtrccJHo4tYLkbrxrvUmpVuDjxHMIkbFSA79fj6lTedNc&_nc_ohc=k31W0RnYLLMAX_2nkRS&_nc_ht=scontent.fldb7-1.fna&oh=00_AT9i-vdW7sZ063G4_jxDD_of3PlqHE_CVktM5nK6mEfpuw&oe=62239F55"}}/>
                         <User>
                             <UserGreeting>Olá, </UserGreeting>
-                            <UserName>Guilherme</UserName>
+                            <UserName>Kellen</UserName>
                         </User>
                     </UserInfo>
                     
